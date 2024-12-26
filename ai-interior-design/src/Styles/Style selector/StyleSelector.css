@@ -1,0 +1,29 @@
+.style-selector {
+    margin-bottom: 20px;
+}
+
+.style-options {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.style-option {
+    margin: 10px;
+    cursor: pointer;
+    text-align: center;
+    border: 3px solid transparent; /* Borde transparente por defecto */
+    padding: 5px;
+    border-radius: 10px;
+}
+
+.style-option.selected {
+    border-color: #007BFF; /* Color principal para el borde del estilo seleccionado */
+}
+
+.style-option img {
+    width: 150px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 5px;
+}

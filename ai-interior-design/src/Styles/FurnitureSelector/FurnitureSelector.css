@@ -1,0 +1,50 @@
+.furniture-selector {
+    margin-bottom: 20px;
+}
+
+.furniture-types {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.furniture-type {
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    margin: 5px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.furniture-type.selected {
+    background-color: #0056b3;
+}
+
+.furniture-items {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.furniture-item {
+    margin: 10px;
+    cursor: pointer;
+    text-align: center;
+    border: 3px solid transparent;
+    padding: 5px;
+    border-radius: 10px;
+}
+
+.furniture-item.selected {
+    border-color: #007BFF;
+}
+
+.furniture-item img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 5px;
+}

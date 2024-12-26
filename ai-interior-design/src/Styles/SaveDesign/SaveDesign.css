@@ -1,0 +1,24 @@
+.save-design {
+    margin-top: 20px; /* Espacio entre la vista previa y el botón de guardar */
+}
+
+.save-design button {
+    background-color: #28a745; /* Color verde para el botón de guardar */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.save-design button:disabled {
+    background-color: #ccc; /* Color gris para el botón deshabilitado */
+    cursor: not-allowed;
+}
+
+.download-icon {
+    margin-right: 8px;
+}

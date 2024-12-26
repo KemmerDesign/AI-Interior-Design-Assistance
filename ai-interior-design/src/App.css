@@ -1,0 +1,15 @@
+body {
+  font-family: 'Ubuntu', sans-serif; /* O la fuente que elijas */
+  background-color: #F8F8F8;
+  color: #333333;
+  margin: 0;
+  padding: 20px;
+}
+
+.app {
+  text-align: center;
+}
+
+h1 {
+  color: #007BFF; /* Color principal para títulos */
+}
