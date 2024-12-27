@@ -1,30 +1,52 @@
-use actix_web::{web, HttpResponse, Responder, http::header::ContentType};
-use crate::models::data_request::UserInput;
-use super::super::services::image_service;
 use crate::services::ai_service;
+use crate::services::image_service;
+use actix_multipart::form::{tempfile::TempFile, text::Text, MultipartForm};
+use actix_web::{http::header::ContentType, Error, HttpResponse};
+use std::io::Read;
 
-pub async fn generate(input: web::Json<UserInput>) -> impl Responder {
-    println!("Datos recibidos: {:?}", input);//Para controlar que la información se este recibiendo correctamente
+#[derive(MultipartForm)]
+pub struct ImageUpload {
+    pub image: TempFile,
+    pub style: Text<String>,
+    pub furniture: Text<String>,
+    pub color: Text<String>,
+}
 
-    // Decodificar la imagen base64
-    // El usar match es para manejar los errores que se puedan presentar en la decodificación de la imagen
-    // esto nos evita tener que usar estructura de flujo como if else y nos permite manejar los errores de una manera más limpia
+pub async fn generate(
+    MultipartForm(form): MultipartForm<ImageUpload>,
+) -> Result<HttpResponse, Error> {
+    // Acceder a los datos del formulario
+    let image = form.image;
+    let style = form.style.into_inner();
+    let furniture = form.furniture.into_inner();
+    let color = form.color.into_inner();
 
-    let image = match image_service::decode_base64_to_image(&input.image) {
+    println!(
+        "Datos recibidos: style: {}, furniture: {}, color: {}",
+        style, furniture, color
+    );
+
+    // Leer la imagen del archivo temporal
+    let mut image_data = Vec::new();
+    if let Ok(mut file) = std::fs::File::open(image.file) {
+        let _ = file.read_to_end(&mut image_data);
+    }
+
+    // Decodificar la imagen
+    let original_image = match image_service::decode_image(&image_data) {
         Ok(image) => image,
-        Err(e) => {//acá se atrapa el error y se imprime en consola
-            eprintln!("Error al decodificar la imagen base64: {:?}", e);
-            return HttpResponse::BadRequest().body("Error al decodificar la imagen");
+        Err(e) => {
+            eprintln!("Error al decodificar la imagen: {:?}", e);
+            return Ok(HttpResponse::BadRequest().body("Error al decodificar la imagen"));
         }
     };
 
     // Preprocesar la imagen
-
-    let preprocessed_image = match image_service::preprocess_image(&image) {
+    let preprocessed_image = match image_service::preprocess_image(&original_image) {
         Ok(image) => image,
         Err(e) => {
             eprintln!("Error al preprocesar la imagen: {:?}", e);
-            return HttpResponse::InternalServerError().body("Error al preprocesar la imagen");
+            return Ok(HttpResponse::InternalServerError().body("Error al preprocesar la imagen"));
         }
     };
 
@@ -33,24 +55,28 @@ pub async fn generate(input: web::Json<UserInput>) -> impl Responder {
         Ok(bytes) => bytes,
         Err(e) => {
             eprintln!("Error al codificar la imagen preprocesada: {:?}", e);
-            return HttpResponse::InternalServerError().body("Error al codificar la imagen");
+            return Ok(HttpResponse::InternalServerError().body("Error al codificar la imagen"));
         }
     };
 
     // Construir el prompt para la API de HuggingFace
-    let prompt = format!("Generate an interior design image in a {} style, incorporating {} furniture and {} walls, based on the uploaded image. Ensure the design reflects a cohesive and aesthetically pleasing arrangement, suitable for a modern home setting.", input.style, input.furniture, input.color);
+    let prompt = format!(
+        "Estilo: {}, Muebles: {}, Color: {}",
+        style, furniture, color
+    );
 
     // Enviar la imagen y el prompt a la API de HuggingFace
-    let generated_image_bytes = match ai_service::generate_image(preprocessed_image_bytes, prompt).await {
-        Ok(bytes) => bytes,
-        Err(e) => {
-            eprintln!("Error al generar la imagen con HuggingFace: {:?}", e);
-            return HttpResponse::InternalServerError().body("Error al generar la imagen");
-        }
-    };
+    let generated_image_bytes =
+        match ai_service::generate_image(preprocessed_image_bytes, prompt).await {
+            Ok(bytes) => bytes,
+            Err(e) => {
+                eprintln!("Error al generar la imagen con HuggingFace: {:?}", e);
+                return Ok(HttpResponse::InternalServerError().body("Error al generar la imagen"));
+            }
+        };
 
     // Devolver la imagen generada
-    HttpResponse::Ok()
+    Ok(HttpResponse::Ok()
         .content_type(ContentType::jpeg())
-        .body(generated_image_bytes)
+        .body(generated_image_bytes))
 }

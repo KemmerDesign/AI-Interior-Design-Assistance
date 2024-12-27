@@ -1,22 +1,16 @@
-
-use opencv::{
-    core::{self, Mat, Size, Rect, CV_8UC3},
-    imgcodecs,
-    imgproc,
-    types::VectorOfu8,
-    prelude::*,
-};
-use std::io::{Cursor, Read, Write};
-use opencv::prelude::*;
-use std::error::Error;
 use base64::{engine::general_purpose, Engine as _};
+use opencv::{
+    core::{self, Mat, Size, Vector},
+    imgcodecs, imgproc,
+    prelude::VectorToVec,
+};
+use std::error::Error;
+use opencv::prelude::MatTraitConst;
 
 pub fn decode_image(image_data: &[u8]) -> Result<Mat, Box<dyn Error>> {
     // Decode the image bytes using imdecode
-    let decoded_image = imgcodecs::imdecode(
-        &Mat::from_slice(image_data)?,
-        imgcodecs::IMREAD_COLOR
-    )?;
+    let decoded_image =
+        imgcodecs::imdecode(&Mat::from_slice(image_data)?, imgcodecs::IMREAD_COLOR)?;
 
     Ok(decoded_image)
 }
@@ -43,7 +37,7 @@ pub fn preprocess_image(image: &Mat) -> Result<Mat, Box<dyn Error>> {
 }
 
 pub fn encode_image(image: &Mat) -> Result<Vec<u8>, Box<dyn Error>> {
-    let mut buffer = VectorOfu8::new();
+    let mut buffer = Vector::<u8>::new();
     imgcodecs::imencode(".jpg", image, &mut buffer, &core::Vector::new())?;
     Ok(buffer.to_vec())
 }

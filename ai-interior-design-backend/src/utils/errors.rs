@@ -1,5 +1,5 @@
-use std::fmt;
 use std::error::Error;
+use std::fmt;
 
 #[derive(Debug)]
 pub enum AppError {
@@ -12,10 +12,15 @@ pub enum AppError {
 impl fmt::Display for AppError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            AppError::ImageDecodingError(msg) => write!(f, "Error al decodificar la imagen: {}", msg),
-            AppError::ImageProcessingError(msg) => write!(f, "Error al procesar la imagen: {}", msg),
-            AppError::HuggingFaceError(msg) => write!(f, "Error al comunicarse con HuggingFace: {}", msg),
-            // ... otros errores
+            AppError::ImageDecodingError(msg) => {
+                write!(f, "Error al decodificar la imagen: {}", msg)
+            }
+            AppError::ImageProcessingError(msg) => {
+                write!(f, "Error al procesar la imagen: {}", msg)
+            }
+            AppError::HuggingFaceError(msg) => {
+                write!(f, "Error al comunicarse con HuggingFace: {}", msg)
+            } // ... otros errores
         }
     }
 }
